@@ -39,7 +39,13 @@ sudo journalctl -u smw-firstboot --no-pager
 Sortie attendue à la fin d'une exécution réussie :
 
 ```
-smw-firstboot.service: Succeeded.
+Finished SMW Marketplace — Configuration au premier démarrage.
+```
+
+ou de façon équivalente :
+
+```
+smw-firstboot[...]: [smw-firstboot] Terminé avec succès
 ```
 
 Si le service est encore en cours d'exécution, suivez le journal en temps réel :
@@ -95,9 +101,10 @@ Chemins importants sur la VM pour référence future :
 |---|---|
 | Installation MediaWiki | `/opt/mediawiki` |
 | Configuration active | `/opt/mediawiki/LocalSettings.firstboot.php` |
-| Configuration Apache | `/etc/apache2/sites-enabled/mediawiki.conf` |
+| Configuration Apache | `/etc/apache2/sites-enabled/smw.conf` |
 | Base de données MySQL | `mediawiki` (utilisateur : `mediawiki`) |
 | Journal d'installation | `/var/log/smw-install.log` |
+| Journal applicatif premier démarrage | `/var/log/smw-firstboot.log` |
 | Fin du premier démarrage | `/var/lib/smw/.firstboot-done` |
 
 ## Résolution de problèmes

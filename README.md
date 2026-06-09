@@ -43,7 +43,12 @@ The **Semantic MediaWiki — Azure Marketplace VM** offer deploys a pre-configur
 
 ## Release Notes
 
-### SMW 6.0.1 / MediaWiki 1.43.0 (May 2026)
+### Image 6.0.20260609 — SMW 6.0.1 / MediaWiki 1.43.0 (June 2026)
+
+**Bug fix**
+- Fixed a first-boot failure caused by the Maps extension (12.1.6) accessing SMW
+  data types before SMW was fully initialized. Maps is now loaded via
+  `$wgExtensionFunctions` to ensure correct initialization order.
 
 **Semantic MediaWiki 6.0.1**
 - Requires PHP 8.1+ and MediaWiki 1.39+

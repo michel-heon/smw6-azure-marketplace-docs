@@ -16,11 +16,12 @@ Ce guide couvre les tâches d'administration courantes pour MediaWiki et Semanti
 |---|---|
 | Installation MediaWiki | `/opt/mediawiki` |
 | Fichier de configuration actif | `/opt/mediawiki/LocalSettings.firstboot.php` |
-| Configuration Apache virtual host | `/etc/apache2/sites-enabled/mediawiki.conf` |
+| Configuration Apache virtual host | `/etc/apache2/sites-enabled/smw.conf` |
 | Nom de la base de données MySQL | `mediawiki` |
 | Utilisateur MySQL | `mediawiki` |
 | Journal d'installation | `/var/log/smw-install.log` |
-| Journal du premier démarrage | `journalctl -u smw-firstboot` |
+| Journal applicatif premier démarrage | `/var/log/smw-firstboot.log` |
+| Journal système premier démarrage | `journalctl -u smw-firstboot` |
 
 ## Gestion des utilisateurs
 
@@ -45,6 +46,26 @@ sudo -u www-data php maintenance/changePassword.php --user="NomUtilisateur" --pa
 
 > Exécutez toujours les scripts de maintenance MediaWiki en tant qu'utilisateur `www-data` pour éviter les problèmes de permissions sur les fichiers.
 
+### Récupérer le mot de passe de l'administrateur wiki
+
+Si vous n'avez pas défini de **mot de passe administrateur wiki** lors du déploiement
+Azure, ou si vous l'avez perdu, le mot de passe a été généré automatiquement au
+premier démarrage et n'est stocké nulle part sur le disque. Utilisez SSH pour le
+réinitialiser :
+
+```bash
+ssh <nom-utilisateur-admin>@<ip-publique>
+cd /opt/mediawiki
+sudo -u www-data php maintenance/changePassword.php --user="WikiAdmin" --password="<nouveau-mot-de-passe-fort>"
+```
+
+Remplacez `<nouveau-mot-de-passe-fort>` par un mot de passe d'au moins 12 caractères.
+Après cette commande, vous pouvez vous connecter au wiki avec le nouveau mot de passe.
+
+> **Note de sécurité :** Choisissez un mot de passe fort et unique, et conservez-le
+> dans un gestionnaire de mots de passe. Le compte administrateur wiki (`WikiAdmin`
+> par défaut) dispose de tous les privilèges d'administration sur le wiki.
+
 ## Gestion des extensions
 
 Les extensions sont gérées avec Composer. Pour lister les extensions installées :
@@ -58,9 +79,16 @@ Pour installer une nouvelle extension depuis le registre d'extensions MediaWiki 
 
 ```bash
 cd /opt/mediawiki
-sudo -u www-data composer require mediawiki/nom-extension:*
+sudo -u www-data composer require mediawiki/nom-extension:"^1.0"
 sudo -u www-data php maintenance/update.php
 ```
+
+> **Important — spécifiez la version :** Utilisez une contrainte de version (ex. `^1.0`
+> ou `~1.2`) plutôt que `*`. L'utilisation de `*` peut installer une version
+> incompatible qui brise le premier démarrage ou les extensions existantes.
+> Par exemple, Maps 12.x nécessite que SMW soit complètement initialisé avant
+> l'exécution de son hook ; une version plus récente pourrait modifier ce
+> comportement et casser `maintenance/update.php`.
 
 Après l'installation, ajoutez l'appel `wfLoadExtension` dans `LocalSettings.firstboot.php` s'il n'a pas été ajouté automatiquement.
 
