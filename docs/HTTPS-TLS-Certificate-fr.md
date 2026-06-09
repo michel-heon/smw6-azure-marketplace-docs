@@ -12,7 +12,7 @@ Le certificat auto-signé est généré au premier démarrage et stocké à :
 |---|---|
 | Certificat | `/etc/ssl/certs/mediawiki-selfsigned.crt` |
 | Clé privée | `/etc/ssl/private/mediawiki-selfsigned.key` |
-| Configuration Apache | `/etc/apache2/sites-enabled/mediawiki.conf` |
+| Configuration Apache | `/etc/apache2/sites-enabled/smw.conf` |
 
 Le certificat est valable **10 ans** et est suffisant pour une utilisation interne ou d'évaluation. Pour les déploiements en production accessibles aux utilisateurs via un nom de domaine public, remplacez-le par un certificat Let's Encrypt.
 

@@ -16,10 +16,11 @@ This guide covers common administration tasks for MediaWiki and Semantic MediaWi
 |---|---|
 | MediaWiki installation | `/opt/mediawiki` |
 | Active configuration file | `/opt/mediawiki/LocalSettings.firstboot.php` |
-| Apache virtual host configuration | `/etc/apache2/sites-enabled/mediawiki.conf` |
+| Apache virtual host configuration | `/etc/apache2/sites-enabled/smw.conf` |
 | MySQL database name | `mediawiki` |
 | MySQL user | `mediawiki` |
 | Installation log | `/var/log/smw-install.log` |
+| First-boot log file | `/var/log/smw-firstboot.log` |
 | First-boot journal | `journalctl -u smw-firstboot` |
 
 ## Managing Users
@@ -45,6 +46,25 @@ sudo -u www-data php maintenance/changePassword.php --user="Username" --password
 
 > Always run MediaWiki maintenance scripts as the `www-data` user to avoid file permission issues.
 
+### Recover the wiki admin password
+
+If you did not set a **Wiki admin password** in the Azure deployment wizard, or if
+you have lost it, the password was generated automatically at first boot and is
+not stored anywhere on disk. Use SSH to reset it:
+
+```bash
+ssh <admin-username>@<public-ip>
+cd /opt/mediawiki
+sudo -u www-data php maintenance/changePassword.php --user="WikiAdmin" --password="<new-strong-password>"
+```
+
+Replace `<new-strong-password>` with a password of at least 12 characters.
+After running this command you can log in to the wiki with the new password.
+
+> **Security note:** Choose a strong, unique password and store it in a password
+> manager. The wiki admin account (`WikiAdmin` by default) has full administrative
+> privileges over the wiki.
+
 ## Managing Extensions
 
 Extensions are managed with Composer. To list installed extensions:
@@ -58,9 +78,15 @@ To install a new extension from the MediaWiki extension registry:
 
 ```bash
 cd /opt/mediawiki
-sudo -u www-data composer require mediawiki/extension-name:*
+sudo -u www-data composer require mediawiki/extension-name:"^1.0"
 sudo -u www-data php maintenance/update.php
 ```
+
+> **Important — pin extension versions:** Use a version constraint (e.g. `^1.0` or
+> `~1.2`) rather than `*`. Using `*` can pull incompatible releases that break
+> first-boot or existing extensions. For example, Maps 12.x requires SMW to be
+> fully loaded before its hook executes; if a newer Maps release changes this
+> behaviour it could break `maintenance/update.php`.
 
 After installation, add the `wfLoadExtension` call to `LocalSettings.firstboot.php` if it was not added automatically.
 
